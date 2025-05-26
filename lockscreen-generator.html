@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Lockscreen Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Light gray background */
+        }
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 1.5rem;
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #374151; /* Gray-700 */
+        }
+        select, input[type="color"], button {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid #d1d5db; /* Gray-300 */
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            transition: all 0.2s ease-in-out;
+        }
+        select:focus, input[type="color"]:focus {
+            border-color: #2563eb; /* Blue-600 */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+            outline: none;
+        }
+        button {
+            background-color: #2563eb; /* Blue-600 */
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1d4ed8; /* Blue-700 */
+        }
+        button:disabled {
+            background-color: #9ca3af; /* Gray-400 */
+            cursor: not-allowed;
+        }
+        #previewContainer {
+            margin-top: 1.5rem;
+            border: 2px dashed #d1d5db; /* Gray-300 */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            background-color: #f9fafb; /* Gray-50 */
+            min-height: 200px; /* Minimum height for the container */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #lockscreenCanvas {
+            display: block;
+            max-width: 100%;
+            max-height: 400px; /* Max height for preview */
+            border-radius: 0.375rem; /* Rounded corners for the canvas */
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+        .message-box {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        .message-box-info {
+            background-color: #eff6ff; /* Blue-50 */
+            color: #1e40af; /* Blue-800 */
+            border: 1px solid #bfdbfe; /* Blue-200 */
+        }
+        .message-box-error {
+            background-color: #fee2e2; /* Red-50 */
+            color: #991b1b; /* Red-800 */
+            border: 1px solid #fecaca; /* Red-200 */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Privacy Lockscreen Generator</h1>
+            <p class="text-gray-600 mt-2">Create custom lockscreen images with privacy messages for your phone.</p>
+        </header>
+
+        <div id="appMessage" class="message-box message-box-info hidden"></div>
+
+        <div class="grid md:grid-cols-2 gap-6">
+            <div class="control-group">
+                <label for="phoneModel">1. Select Phone Model:</label>
+                <select id="phoneModel"></select>
+            </div>
+
+            <div class="control-group">
+                <label for="privacyMessage">2. Select Privacy Message:</label>
+                <select id="privacyMessage"></select>
+            </div>
+
+            <div class="control-group">
+                <label for="backgroundColor">3. Background Color:</label>
+                <input type="color" id="backgroundColor" value="#222222">
+            </div>
+
+            <div class="control-group">
+                <label for="textColor">4. Text Color:</label>
+                <select id="textColor">
+                    <option value="#FFFFFF">White</option>
+                    <option value="#000000">Black</option>
+                    <option value="#DDDDDD">Light Gray</option>
+                    <option value="#333333">Dark Gray</option>
+                </select>
+            </div>
+        </div>
+
+        <button id="generateButton" class="w-full py-3">Generate Lockscreen</button>
+
+        <div id="previewContainer" class="mt-6">
+            <canvas id="lockscreenCanvas"></canvas>
+        </div>
+
+        <button id="downloadButton" class="mt-6 w-full py-3" disabled>Download Image</button>
+    </div>
+
+    <script>
+        // --- Data ---
+        const devices = [
+            // Common aspect ratios and resolutions.
+            // Reserved areas are estimates. Real devices vary greatly.
+            // These values (reservedTop, etc.) are in pixels.
+            { name: "Generic Phone (19.5:9)", width: 1080, height: 2340, reservedTop: 120, reservedBottom: 100, reservedLeft: 30, reservedRight: 30 },
+            { name: "Generic Phone (20:9)", width: 1080, height: 2400, reservedTop: 130, reservedBottom: 100, reservedLeft: 30, reservedRight: 30 },
+            { name: "Generic Phone (16:9)", width: 1080, height: 1920, reservedTop: 100, reservedBottom: 80, reservedLeft: 20, reservedRight: 20 },
+            { name: "iPhone 15 Pro Max (19.5:9)", width: 1290, height: 2796, reservedTop: 170, reservedBottom: 120, reservedLeft: 40, reservedRight: 40 },
+            { name: "iPhone 15 (19.5:9)", width: 1179, height: 2556, reservedTop: 160, reservedBottom: 110, reservedLeft: 35, reservedRight: 35 },
+            { name: "Samsung Galaxy S24 Ultra (19.3:9)", width: 1440, height: 3120, reservedTop: 150, reservedBottom: 110, reservedLeft: 30, reservedRight: 30 },
+            { name: "Google Pixel 8 Pro (20:9)", width: 1344, height: 2992, reservedTop: 140, reservedBottom: 100, reservedLeft: 30, reservedRight: 30 },
+            { name: "Square (for testing)", width: 1000, height: 1000, reservedTop: 50, reservedBottom: 50, reservedLeft: 50, reservedRight: 50 },
+        ];
+
+        const messages = [
+            "Owner Does Not Consent To Search of This Device.",
+            "This Device Is Private Property. A Warrant Is Required.",
+            "I Invoke My Right To Remain Silent.",
+            "Access Restricted. Authorized Users Only.",
+            "If Found, Please Contact: [Your Info Here]",
+            "Privacy Is A Right, Not A Privilege.",
+            "Handle With Care: Private Data Enclosed."
+        ];
+
+        // --- DOM Elements ---
+        const phoneModelSelect = document.getElementById('phoneModel');
+        const privacyMessageSelect = document.getElementById('privacyMessage');
+        const backgroundColorInput = document.getElementById('backgroundColor');
+        const textColorSelect = document.getElementById('textColor');
+        const generateButton = document.getElementById('generateButton');
+        const downloadButton = document.getElementById('downloadButton');
+        const canvas = document.getElementById('lockscreenCanvas');
+        const ctx = canvas.getContext('2d');
+        const previewContainer = document.getElementById('previewContainer');
+        const appMessageDiv = document.getElementById('appMessage');
+
+        // --- Initialization ---
+        function init() {
+            // Populate dropdowns
+            devices.forEach((device, index) => {
+                const option = new Option(device.name, index);
+                phoneModelSelect.add(option);
+            });
+
+            messages.forEach((message, index) => {
+                const option = new Option(message, index);
+                privacyMessageSelect.add(option);
+            });
+
+            // Event Listeners
+            generateButton.addEventListener('click', generateImage);
+            downloadButton.addEventListener('click', downloadImage);
+            
+            // Hide canvas initially by not setting its dimensions
+            canvas.style.display = 'none';
+            previewContainer.classList.add('items-center', 'justify-center');
+            previewContainer.innerHTML = '<p class="text-gray-500">Preview will appear here</p>';
+
+            showMessage("Select your options and click 'Generate Lockscreen'. Note: Reserved areas for OS elements are estimates.", "info");
+        }
+
+        // --- Message Display ---
+        function showMessage(message, type = "info") {
+            appMessageDiv.textContent = message;
+            appMessageDiv.className = `message-box message-box-${type}`; // Reset classes
+            appMessageDiv.classList.remove('hidden');
+        }
+
+        // --- Image Generation ---
+        function generateImage() {
+            try {
+                const selectedDeviceIndex = phoneModelSelect.value;
+                const selectedMessageIndex = privacyMessageSelect.value;
+                const bgColor = backgroundColorInput.value;
+                const textColor = textColorSelect.value;
+
+                if (!selectedDeviceIndex || !selectedMessageIndex) {
+                    showMessage("Please select a phone model and a message.", "error");
+                    return;
+                }
+
+                const device = devices[selectedDeviceIndex];
+                const message = messages[selectedMessageIndex];
+
+                // Set canvas dimensions
+                canvas.width = device.width;
+                canvas.height = device.height;
+                canvas.style.display = 'block'; // Make canvas visible
+                
+                // Clear previous content in preview container if any
+                previewContainer.innerHTML = ''; 
+                previewContainer.appendChild(canvas);
+                previewContainer.classList.remove('items-center', 'justify-center');
+
+
+                // 1. Draw Background
+                ctx.fillStyle = bgColor;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // 2. Define Safe Zone for text
+                // These are the areas where text should NOT go.
+                const safeX = device.reservedLeft;
+                const safeY = device.reservedTop;
+                const safeWidth = device.width - device.reservedLeft - device.reservedRight;
+                const safeHeight = device.height - device.reservedTop - device.reservedBottom;
+
+                // --- DEBUG: Draw Safe Zone (Optional) ---
+                // ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)'; // Red semi-transparent
+                // ctx.lineWidth = 5;
+                // ctx.strokeRect(safeX, safeY, safeWidth, safeHeight);
+                // --- END DEBUG ---
+
+                // 3. Draw Text
+                ctx.fillStyle = textColor;
+                
+                // Dynamic font sizing logic
+                let fontSize = Math.min(safeWidth / 10, safeHeight / 5); // Start with a reasonable max font size
+                fontSize = Math.max(20, fontSize); // Ensure a minimum font size (e.g., 20px)
+                
+                // Reduce font size if message is very long, relative to safe width
+                if (message.length > 30) fontSize *= 0.8;
+                if (message.length > 50) fontSize *= 0.8;
+
+
+                ctx.font = `bold ${fontSize}px Inter, sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                // Wrap text and draw it
+                const lines = wrapText(ctx, message, safeWidth - 40); // Subtract some padding
+                const lineHeight = fontSize * 1.2; // Line height based on font size
+                const totalTextHeight = lines.length * lineHeight;
+
+                // Calculate starting Y position to center the block of text vertically in the safe zone
+                let textBlockStartY = safeY + (safeHeight - totalTextHeight) / 2;
+
+                lines.forEach((line, index) => {
+                    const yPos = textBlockStartY + (index * lineHeight) + (lineHeight / 2); // Center each line vertically
+                     // Ensure text is drawn within the canvas bounds, especially safeX + safeWidth / 2
+                    const xPos = Math.max(0, Math.min(canvas.width, safeX + safeWidth / 2));
+                    ctx.fillText(line, xPos, yPos);
+                });
+                
+                downloadButton.disabled = false;
+                showMessage("Lockscreen generated! You can now download it.", "info");
+
+            } catch (error) {
+                console.error("Error generating image:", error);
+                showMessage(`Error generating image: ${error.message}. Please try again.`, "error");
+                downloadButton.disabled = true;
+                // Reset canvas preview if error
+                canvas.style.display = 'none';
+                previewContainer.classList.add('items-center', 'justify-center');
+                previewContainer.innerHTML = '<p class="text-gray-500 text-red-600">Error generating preview. Check console.</p>';
+            }
+        }
+
+        function wrapText(context, text, maxWidth) {
+            const words = text.split(' ');
+            const lines = [];
+            let currentLine = words[0];
+
+            for (let i = 1; i < words.length; i++) {
+                const word = words[i];
+                const width = context.measureText(currentLine + " " + word).width;
+                if (width < maxWidth) {
+                    currentLine += " " + word;
+                } else {
+                    lines.push(currentLine);
+                    currentLine = word;
+                }
+            }
+            lines.push(currentLine); // Add the last line
+            return lines;
+        }
+
+        // --- Download Image ---
+        function downloadImage() {
+            if (canvas.style.display === 'none' || downloadButton.disabled) {
+                showMessage("Please generate an image first.", "error");
+                return;
+            }
+            try {
+                const selectedDevice = devices[phoneModelSelect.value];
+                const imageName = `privacy_lockscreen_${selectedDevice.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.png`;
+                
+                const dataURL = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.download = imageName;
+                link.href = dataURL;
+                document.body.appendChild(link); // Required for Firefox
+                link.click();
+                document.body.removeChild(link);
+                showMessage(`Image '${imageName}' download started.`, "info");
+            } catch (error) {
+                console.error("Error downloading image:", error);
+                showMessage(`Error downloading image: ${error.message}.`, "error");
+            }
+        }
+
+        // --- Run ---
+        init();
+    </script>
+</body>
+</html>
