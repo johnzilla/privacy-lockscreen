@@ -23,6 +23,18 @@ const messages = [
     "Handle With Care: Private Data Enclosed."
 ];
 
+// Color templates for quick selection
+const colorTemplates = [
+    { name: "Classic Dark", bg: "#222222", text: "#FFFFFF" },
+    { name: "Pure Black", bg: "#000000", text: "#FFFFFF" },
+    { name: "Clean White", bg: "#FFFFFF", text: "#000000" },
+    { name: "Navy Blue", bg: "#1e3a8a", text: "#FFFFFF" },
+    { name: "Forest Green", bg: "#166534", text: "#FFFFFF" },
+    { name: "Deep Red", bg: "#991b1b", text: "#FFFFFF" },
+    { name: "Purple", bg: "#7c3aed", text: "#FFFFFF" },
+    { name: "Charcoal", bg: "#374151", text: "#FFFFFF" }
+];
+
 // --- DOM Elements ---
 const phoneModelSelect = document.getElementById('phoneModel');
 const privacyMessageSelect = document.getElementById('privacyMessage');
@@ -34,6 +46,9 @@ const canvas = document.getElementById('lockscreenCanvas');
 const ctx = canvas.getContext('2d');
 const previewContainer = document.getElementById('previewContainer');
 const appMessageDiv = document.getElementById('appMessage');
+const colorTemplatesContainer = document.getElementById('colorTemplates');
+
+let selectedTemplateIndex = 0; // Default to first template
 
 // --- Initialization ---
 function init() {
@@ -48,6 +63,9 @@ function init() {
         privacyMessageSelect.add(option);
     });
 
+    // Populate color templates
+    populateColorTemplates();
+    
     // Event Listeners
     generateButton.addEventListener('click', generateImage);
     downloadButton.addEventListener('click', downloadImage);
@@ -62,6 +80,66 @@ function init() {
     showMessage("Select your options and click 'Generate Lockscreen'. Note: Reserved areas for OS elements are estimates.", "info");
 }
 
+// --- Color Template Functions ---
+function populateColorTemplates() {
+    colorTemplates.forEach((template, index) => {
+        const templateDiv = document.createElement('div');
+        templateDiv.className = `color-template ${index === 0 ? 'selected' : ''}`;
+        templateDiv.onclick = () => selectColorTemplate(index);
+        templateDiv.title = template.name;
+        
+        templateDiv.innerHTML = `
+            <div class="bg-section" style="background-color: ${template.bg}"></div>
+            <div class="text-section" style="background-color: ${template.bg}; color: ${template.text}">Aa</div>
+        `;
+        
+        colorTemplatesContainer.appendChild(templateDiv);
+    });
+    
+    // Set initial colors from first template
+    applyColorTemplate(0);
+}
+
+function selectColorTemplate(index) {
+    // Remove selected class from all templates
+    document.querySelectorAll('.color-template').forEach(template => {
+        template.classList.remove('selected');
+    });
+    
+    // Add selected class to clicked template
+    document.querySelectorAll('.color-template')[index].classList.add('selected');
+    
+    selectedTemplateIndex = index;
+    applyColorTemplate(index);
+    
+    // Hide custom colors section when template is selected
+    document.getElementById('customColorSection').classList.remove('show');
+}
+
+function applyColorTemplate(index) {
+    const template = colorTemplates[index];
+    backgroundColorInput.value = template.bg;
+    textColorSelect.value = template.text;
+    updateColorPreviews();
+}
+
+function toggleCustomColors() {
+    const customSection = document.getElementById('customColorSection');
+    const isShowing = customSection.classList.contains('show');
+    
+    if (isShowing) {
+        customSection.classList.remove('show');
+        // Reapply selected template
+        applyColorTemplate(selectedTemplateIndex);
+    } else {
+        customSection.classList.add('show');
+        // Remove selection from templates when using custom
+        document.querySelectorAll('.color-template').forEach(template => {
+            template.classList.remove('selected');
+        });
+    }
+}
+
 // --- Color Preview Updates ---
 function updateColorPreviews() {
     const bgColor = backgroundColorInput.value;
@@ -69,6 +147,14 @@ function updateColorPreviews() {
     
     document.getElementById('bgColorPreview').style.backgroundColor = bgColor;
     document.getElementById('textColorPreview').style.backgroundColor = textColor;
+    
+    // If custom colors are being used, remove template selection
+    const customSection = document.getElementById('customColorSection');
+    if (customSection.classList.contains('show')) {
+        document.querySelectorAll('.color-template').forEach(template => {
+            template.classList.remove('selected');
+        });
+    }
 }
 
 // --- Message Display ---

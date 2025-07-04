@@ -271,6 +271,75 @@
             box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
             border-color: #3b82f6;
         }
+        
+        .color-template {
+            width: 80px;
+            height: 60px;
+            border-radius: 12px;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .color-template:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .color-template.selected {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+        
+        .color-template .bg-section {
+            flex: 2;
+            width: 100%;
+        }
+        
+        .color-template .text-section {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        
+        .custom-color-section {
+            display: none;
+            margin-top: 16px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 2px dashed #cbd5e1;
+        }
+        
+        .custom-color-section.show {
+            display: block;
+        }
+        
+        .custom-toggle-btn {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 12px;
+        }
+        
+        .custom-toggle-btn:hover {
+            background: linear-gradient(135deg, #4b5563, #374151);
+            transform: translateY(-1px);
+        }
     </style>
 </head>
 <body class="font-inter">
@@ -328,37 +397,51 @@
                     <div class="grid-item">
                         <div class="step-indicator">
                             <div class="step-number">3</div>
-                            <h3 class="text-lg font-semibold text-gray-800">Background Color</h3>
+                            <h3 class="text-lg font-semibold text-gray-800">Choose Colors</h3>
                         </div>
-                        <div class="flex items-center">
-                            <div class="input-group flex-1">
-                                <input type="color" id="backgroundColor" class="form-input h-16" value="#222222">
-                                <label class="floating-label">Background</label>
+                        
+                        <!-- Quick Color Templates -->
+                        <div class="mb-4">
+                            <p class="text-sm font-medium text-gray-700 mb-3">Quick Pick Templates:</p>
+                            <div class="grid grid-cols-4 gap-3" id="colorTemplates">
+                                <!-- Templates will be populated by JavaScript -->
                             </div>
-                            <div id="bgColorPreview" class="color-preview ml-4" style="background-color: #222222;"></div>
+                            <button type="button" class="custom-toggle-btn" onclick="toggleCustomColors()">
+                                <i class="fas fa-palette mr-2"></i>Custom Colors
+                            </button>
+                        </div>
+
+                        <!-- Custom Color Section (Hidden by default) -->
+                        <div id="customColorSection" class="custom-color-section">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="flex items-center">
+                                    <div class="input-group flex-1">
+                                        <input type="color" id="backgroundColor" class="form-input h-16" value="#222222">
+                                        <label class="floating-label">Background</label>
+                                    </div>
+                                    <div id="bgColorPreview" class="color-preview ml-4" style="background-color: #222222;"></div>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="input-group flex-1">
+                                        <select id="textColor" class="form-input" placeholder=" ">
+                                            <option value="#FFFFFF">White</option>
+                                            <option value="#000000">Black</option>
+                                            <option value="#DDDDDD">Light Gray</option>
+                                            <option value="#333333">Dark Gray</option>
+                                            <option value="#3b82f6">Blue</option>
+                                            <option value="#ef4444">Red</option>
+                                        </select>
+                                        <label class="floating-label">Text Color</label>
+                                    </div>
+                                    <div id="textColorPreview" class="color-preview ml-4" style="background-color: #FFFFFF;"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Text Color -->
+                    <!-- Empty grid item to maintain layout -->
                     <div class="grid-item">
-                        <div class="step-indicator">
-                            <div class="step-number">4</div>
-                            <h3 class="text-lg font-semibold text-gray-800">Text Color</h3>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="input-group flex-1">
-                                <select id="textColor" class="form-input" placeholder=" ">
-                                    <option value="#FFFFFF">White</option>
-                                    <option value="#000000">Black</option>
-                                    <option value="#DDDDDD">Light Gray</option>
-                                    <option value="#333333">Dark Gray</option>
-                                    <option value="#3b82f6">Blue</option>
-                                    <option value="#ef4444">Red</option>
-                                </select>
-                                <label class="floating-label">Text Color</label>
-                            </div>
-                            <div id="textColorPreview" class="color-preview ml-4" style="background-color: #FFFFFF;"></div>
-                        </div>
+                        <!-- This maintains the 2x2 grid layout -->
                     </div>
                 </div>
 
