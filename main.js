@@ -33,6 +33,15 @@ const colorTemplates = [
     { name: "Deep Red", bg: "#991b1b", text: "#FFFFFF" },
     { name: "Purple", bg: "#7c3aed", text: "#FFFFFF" },
     { name: "Charcoal", bg: "#374151", text: "#FFFFFF" }
+    { name: "Charcoal", bg: "#374151", text: "#FFFFFF" },
+    { name: "Light Gray", bg: "#f3f4f6", text: "#000000" },
+    { name: "Soft Blue", bg: "#dbeafe", text: "#000000" },
+    { name: "Mint Green", bg: "#d1fae5", text: "#000000" },
+    { name: "Warm Beige", bg: "#fef3c7", text: "#000000" },
+    { name: "Lavender", bg: "#e0e7ff", text: "#000000" },
+    { name: "Peach", bg: "#fed7aa", text: "#000000" },
+    { name: "Rose Pink", bg: "#fce7f3", text: "#000000" },
+    { name: "Ice Blue", bg: "#ecfeff", text: "#000000" }
 ];
 
 // --- DOM Elements ---
