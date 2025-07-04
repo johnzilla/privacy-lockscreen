@@ -32,7 +32,7 @@ const colorTemplates = [
     { name: "Forest Green", bg: "#166534", text: "#FFFFFF" },
     { name: "Deep Red", bg: "#991b1b", text: "#FFFFFF" },
     { name: "Purple", bg: "#7c3aed", text: "#FFFFFF" },
-    { name: "Charcoal", bg: "#374151", text: "#FFFFFF" }
+    { name: "Charcoal", bg: "#374151", text: "#FFFFFF" },
     { name: "Charcoal", bg: "#374151", text: "#FFFFFF" },
     { name: "Light Gray", bg: "#f3f4f6", text: "#000000" },
     { name: "Soft Blue", bg: "#dbeafe", text: "#000000" },
