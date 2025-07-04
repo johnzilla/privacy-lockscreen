@@ -248,6 +248,29 @@
         .grid-item:nth-child(2) { animation-delay: 0.2s; }
         .grid-item:nth-child(3) { animation-delay: 0.3s; }
         .grid-item:nth-child(4) { animation-delay: 0.4s; }
+        
+        .share-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border: 1px solid #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #475569;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .share-btn:hover {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+            border-color: #3b82f6;
+        }
     </style>
 </head>
 <body class="font-inter">
@@ -391,6 +414,39 @@
                 </div>
             </div>
         </div>
+
+        <!-- Footer -->
+        <footer class="mt-16 text-center">
+            <div class="glass-card rounded-2xl p-8 max-w-4xl mx-auto">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                    <!-- Copyright -->
+                    <div class="text-gray-700">
+                        <p class="font-medium">© 2025 Privacy Lockscreen Generator</p>
+                        <p class="text-sm text-gray-600 mt-1">Protecting digital rights, one screen at a time</p>
+                    </div>
+
+                    <!-- Share Icons -->
+                    <div class="flex items-center gap-4">
+                        <span class="text-gray-700 font-medium mr-2">Share:</span>
+                        <button onclick="shareOnTwitter()" class="share-btn" title="Share on Twitter">
+                            <i class="fab fa-twitter"></i>
+                        </button>
+                        <button onclick="shareOnFacebook()" class="share-btn" title="Share on Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </button>
+                        <button onclick="shareOnLinkedIn()" class="share-btn" title="Share on LinkedIn">
+                            <i class="fab fa-linkedin-in"></i>
+                        </button>
+                        <button onclick="copyToClipboard()" class="share-btn" title="Copy link">
+                            <i class="fas fa-link"></i>
+                        </button>
+                        <button onclick="shareNative()" class="share-btn" title="Share">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </footer>
     </div>
 
     <script src="./main.js"></script>

@@ -217,3 +217,46 @@ function downloadImage() {
 // --- Run ---
 init();
 updateColorPreviews();
+
+// --- Social Sharing Functions ---
+function shareOnTwitter() {
+    const text = "Check out this Privacy Lockscreen Generator! Create custom lockscreen images to protect your digital rights.";
+    const url = window.location.href;
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+}
+
+function shareOnFacebook() {
+    const url = window.location.href;
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+}
+
+function shareOnLinkedIn() {
+    const title = "Privacy Lockscreen Generator";
+    const summary = "Create custom lockscreen images to protect your digital rights";
+    const url = window.location.href;
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&summary=${encodeURIComponent(summary)}`, '_blank');
+}
+
+function copyToClipboard() {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+        showMessage("Link copied to clipboard!", "success");
+    }).catch(() => {
+        showMessage("Failed to copy link. Please copy manually.", "error");
+    });
+}
+
+function shareNative() {
+    if (navigator.share) {
+        navigator.share({
+            title: 'Privacy Lockscreen Generator',
+            text: 'Create custom lockscreen images to protect your digital rights',
+            url: window.location.href
+        }).catch(() => {
+            // Fallback to copy to clipboard if native share fails
+            copyToClipboard();
+        });
+    } else {
+        // Fallback for browsers that don't support native sharing
+        copyToClipboard();
+    }
+}
