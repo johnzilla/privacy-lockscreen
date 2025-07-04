@@ -52,18 +52,32 @@ function init() {
     generateButton.addEventListener('click', generateImage);
     downloadButton.addEventListener('click', downloadImage);
     
+    // Color preview updates
+    backgroundColorInput.addEventListener('input', updateColorPreviews);
+    textColorSelect.addEventListener('change', updateColorPreviews);
+    
     // Hide canvas initially by not setting its dimensions
     canvas.style.display = 'none';
-    previewContainer.classList.add('items-center', 'justify-center');
-    previewContainer.innerHTML = '<p class="text-gray-500">Preview will appear here</p>';
 
     showMessage("Select your options and click 'Generate Lockscreen'. Note: Reserved areas for OS elements are estimates.", "info");
 }
 
+// --- Color Preview Updates ---
+function updateColorPreviews() {
+    const bgColor = backgroundColorInput.value;
+    const textColor = textColorSelect.value;
+    
+    document.getElementById('bgColorPreview').style.backgroundColor = bgColor;
+    document.getElementById('textColorPreview').style.backgroundColor = textColor;
+}
+
 // --- Message Display ---
 function showMessage(message, type = "info") {
-    appMessageDiv.textContent = message;
-    appMessageDiv.className = `message-box message-box-${type}`; // Reset classes
+    const icon = type === "error" ? "fas fa-exclamation-triangle" : 
+                 type === "success" ? "fas fa-check-circle" : "fas fa-info-circle";
+    
+    appMessageDiv.innerHTML = `<i class="${icon}"></i><span>${message}</span>`;
+    appMessageDiv.className = `message-card message-${type}`; // Reset classes
     appMessageDiv.classList.remove('hidden');
 }
 
@@ -89,9 +103,12 @@ function generateImage() {
         canvas.style.display = 'block'; // Make canvas visible
         
         // Clear previous content in preview container if any
-        previewContainer.innerHTML = ''; 
+        const existingContent = previewContainer.querySelector(':not(canvas)');
+        if (existingContent) {
+            existingContent.remove();
+        }
         previewContainer.appendChild(canvas);
-        previewContainer.classList.remove('items-center', 'justify-center');
+        previewContainer.classList.add('has-content');
 
         // 1. Draw Background
         ctx.fillStyle = bgColor;
@@ -135,7 +152,7 @@ function generateImage() {
         });
         
         downloadButton.disabled = false;
-        showMessage("Lockscreen generated! You can now download it.", "info");
+        showMessage("Lockscreen generated successfully! You can now download it.", "success");
 
     } catch (error) {
         console.error("Error generating image:", error);
@@ -143,8 +160,14 @@ function generateImage() {
         downloadButton.disabled = true;
         // Reset canvas preview if error
         canvas.style.display = 'none';
-        previewContainer.classList.add('items-center', 'justify-center');
-        previewContainer.innerHTML = '<p class="text-gray-500 text-red-600">Error generating preview. Check console.</p>';
+        previewContainer.classList.remove('has-content');
+        previewContainer.innerHTML = `
+            <div class="text-center">
+                <i class="fas fa-exclamation-triangle text-6xl text-red-400 mb-4"></i>
+                <p class="text-red-500 text-lg font-medium">Error generating preview</p>
+                <p class="text-red-400 text-sm mt-2">Please check your selections and try again</p>
+            </div>
+        `;
     }
 }
 
@@ -184,7 +207,7 @@ function downloadImage() {
         document.body.appendChild(link); // Required for Firefox
         link.click();
         document.body.removeChild(link);
-        showMessage(`Image '${imageName}' download started.`, "info");
+        showMessage(`Image '${imageName}' download started successfully!`, "success");
     } catch (error) {
         console.error("Error downloading image:", error);
         showMessage(`Error downloading image: ${error.message}.`, "error");
@@ -193,3 +216,4 @@ function downloadImage() {
 
 // --- Run ---
 init();
+updateColorPreviews();

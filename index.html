@@ -5,135 +5,392 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Privacy Lockscreen Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary': {
+                            50: '#eff6ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
         }
-        .container {
-            max-width: 900px;
-            margin: 2rem auto;
-            padding: 1.5rem;
-            background-color: white;
-            border-radius: 0.75rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
+        
+        .input-group {
+            position: relative;
+        }
+        
+        .floating-label {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            padding: 0 8px;
+            color: #6b7280;
+            font-size: 14px;
             font-weight: 500;
-            color: #374151;
+            transition: all 0.2s ease;
+            pointer-events: none;
+            z-index: 1;
         }
-        select, input[type="color"], button {
+        
+        .form-input {
             width: 100%;
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            border: 1px solid #d1d5db;
-            margin-bottom: 1rem;
-            font-size: 1rem;
-            transition: all 0.2s ease-in-out;
+            padding: 16px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
         }
-        select:focus, input[type="color"]:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        
+        .form-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
             outline: none;
         }
-        button {
-            background-color: #2563eb;
+        
+        .form-input:focus + .floating-label,
+        .form-input:not(:placeholder-shown) + .floating-label {
+            top: 0;
+            font-size: 12px;
+            color: #3b82f6;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
             color: white;
-            font-weight: 500;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-primary:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            border: none;
             cursor: pointer;
         }
-        button:hover {
-            background-color: #1d4ed8;
+        
+        .btn-secondary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
         }
-        button:disabled {
-            background-color: #9ca3af;
+        
+        .btn-secondary:disabled {
+            background: #9ca3af;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
-        #previewContainer {
-            margin-top: 1.5rem;
-            border: 2px dashed #d1d5db;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            background-color: #f9fafb;
-            min-height: 200px;
+        
+        .preview-container {
+            background: linear-gradient(145deg, #f8fafc, #e2e8f0);
+            border: 3px dashed #cbd5e1;
+            border-radius: 20px;
+            padding: 32px;
+            min-height: 300px;
             display: flex;
             justify-content: center;
             align-items: center;
+            transition: all 0.3s ease;
         }
+        
+        .preview-container.has-content {
+            background: #f8fafc;
+            border: 3px solid #e2e8f0;
+        }
+        
         #lockscreenCanvas {
-            display: block;
             max-width: 100%;
-            max-height: 400px;
-            border-radius: 0.375rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-height: 500px;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
         }
-        .control-group {
-            margin-bottom: 1.5rem;
+        
+        .message-card {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
-        .message-box {
-            padding: 1rem;
-            border-radius: 0.5rem;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-        }
-        .message-box-info {
-            background-color: #eff6ff;
+        
+        .message-info {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
             color: #1e40af;
-            border: 1px solid #bfdbfe;
+            border: 1px solid #93c5fd;
         }
-        .message-box-error {
-            background-color: #fee2e2;
+        
+        .message-error {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
             color: #991b1b;
-            border: 1px solid #fecaca;
+            border: 1px solid #f87171;
         }
+        
+        .message-success {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+        
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .step-number {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .color-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+            margin-left: 12px;
+        }
+        
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        .grid-item {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        .grid-item:nth-child(1) { animation-delay: 0.1s; }
+        .grid-item:nth-child(2) { animation-delay: 0.2s; }
+        .grid-item:nth-child(3) { animation-delay: 0.3s; }
+        .grid-item:nth-child(4) { animation-delay: 0.4s; }
     </style>
 </head>
-<body>
-    <div class="container">
-        <header class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-800">Privacy Lockscreen Generator</h1>
-            <p class="text-gray-600 mt-2">Create custom lockscreen images with privacy messages for your phone.</p>
-        </header>
+<body class="font-inter">
+    <div class="min-h-screen py-8 px-4">
+        <div class="max-w-6xl mx-auto">
+            <!-- Header -->
+            <header class="text-center mb-12 animate-fade-in-up">
+                <div class="feature-icon mx-auto mb-6">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h1 class="text-5xl font-bold text-white mb-4">Privacy Lockscreen Generator</h1>
+                <p class="text-xl text-white/80 max-w-2xl mx-auto leading-relaxed">
+                    Create beautiful, custom lockscreen images with privacy messages to protect your digital rights
+                </p>
+            </header>
 
-        <div id="appMessage" class="message-box message-box-info hidden"></div>
+            <!-- Main Content -->
+            <div class="glass-card rounded-3xl shadow-2xl p-8 mb-8">
+                <div id="appMessage" class="message-card message-info hidden">
+                    <i class="fas fa-info-circle"></i>
+                    <span></span>
+                </div>
 
-        <div class="grid md:grid-cols-2 gap-6">
-            <div class="control-group">
-                <label for="phoneModel">1. Select Phone Model:</label>
-                <select id="phoneModel"></select>
+                <!-- Controls Grid -->
+                <div class="grid lg:grid-cols-2 gap-8 mb-8">
+                    <!-- Phone Model Selection -->
+                    <div class="grid-item">
+                        <div class="step-indicator">
+                            <div class="step-number">1</div>
+                            <h3 class="text-lg font-semibold text-gray-800">Choose Your Device</h3>
+                        </div>
+                        <div class="input-group">
+                            <select id="phoneModel" class="form-input" placeholder=" ">
+                                <option value="">Select your phone model...</option>
+                            </select>
+                            <label class="floating-label">Phone Model</label>
+                        </div>
+                    </div>
+
+                    <!-- Privacy Message Selection -->
+                    <div class="grid-item">
+                        <div class="step-indicator">
+                            <div class="step-number">2</div>
+                            <h3 class="text-lg font-semibold text-gray-800">Select Privacy Message</h3>
+                        </div>
+                        <div class="input-group">
+                            <select id="privacyMessage" class="form-input" placeholder=" ">
+                                <option value="">Choose a privacy message...</option>
+                            </select>
+                            <label class="floating-label">Privacy Message</label>
+                        </div>
+                    </div>
+
+                    <!-- Background Color -->
+                    <div class="grid-item">
+                        <div class="step-indicator">
+                            <div class="step-number">3</div>
+                            <h3 class="text-lg font-semibold text-gray-800">Background Color</h3>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="input-group flex-1">
+                                <input type="color" id="backgroundColor" class="form-input h-16" value="#222222">
+                                <label class="floating-label">Background</label>
+                            </div>
+                            <div id="bgColorPreview" class="color-preview ml-4" style="background-color: #222222;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Text Color -->
+                    <div class="grid-item">
+                        <div class="step-indicator">
+                            <div class="step-number">4</div>
+                            <h3 class="text-lg font-semibold text-gray-800">Text Color</h3>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="input-group flex-1">
+                                <select id="textColor" class="form-input" placeholder=" ">
+                                    <option value="#FFFFFF">White</option>
+                                    <option value="#000000">Black</option>
+                                    <option value="#DDDDDD">Light Gray</option>
+                                    <option value="#333333">Dark Gray</option>
+                                    <option value="#3b82f6">Blue</option>
+                                    <option value="#ef4444">Red</option>
+                                </select>
+                                <label class="floating-label">Text Color</label>
+                            </div>
+                            <div id="textColorPreview" class="color-preview ml-4" style="background-color: #FFFFFF;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Generate Button -->
+                <div class="text-center mb-8">
+                    <button id="generateButton" class="btn-primary w-full lg:w-auto px-12">
+                        <i class="fas fa-magic mr-2"></i>
+                        Generate Lockscreen
+                    </button>
+                </div>
+
+                <!-- Preview Container -->
+                <div id="previewContainer" class="preview-container">
+                    <div class="text-center">
+                        <i class="fas fa-mobile-alt text-6xl text-gray-400 mb-4"></i>
+                        <p class="text-gray-500 text-lg font-medium">Your lockscreen preview will appear here</p>
+                        <p class="text-gray-400 text-sm mt-2">Select your options above and click generate</p>
+                    </div>
+                    <canvas id="lockscreenCanvas" style="display: none;"></canvas>
+                </div>
+
+                <!-- Download Button -->
+                <div class="text-center mt-8">
+                    <button id="downloadButton" class="btn-secondary w-full lg:w-auto px-12" disabled>
+                        <i class="fas fa-download mr-2"></i>
+                        Download Image
+                    </button>
+                </div>
             </div>
 
-            <div class="control-group">
-                <label for="privacyMessage">2. Select Privacy Message:</label>
-                <select id="privacyMessage"></select>
-            </div>
-
-            <div class="control-group">
-                <label for="backgroundColor">3. Background Color:</label>
-                <input type="color" id="backgroundColor" value="#222222">
-            </div>
-
-            <div class="control-group">
-                <label for="textColor">4. Text Color:</label>
-                <select id="textColor">
-                    <option value="#FFFFFF">White</option>
-                    <option value="#000000">Black</option>
-                    <option value="#DDDDDD">Light Gray</option>
-                    <option value="#333333">Dark Gray</option>
-                </select>
+            <!-- Features Section -->
+            <div class="grid md:grid-cols-3 gap-6 text-center">
+                <div class="glass-card rounded-2xl p-6">
+                    <div class="feature-icon mx-auto mb-4">
+                        <i class="fas fa-palette"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-white mb-2">Customizable Design</h3>
+                    <p class="text-white/70">Choose colors and messages that match your style</p>
+                </div>
+                <div class="glass-card rounded-2xl p-6">
+                    <div class="feature-icon mx-auto mb-4">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-white mb-2">Device Optimized</h3>
+                    <p class="text-white/70">Perfect fit for popular phone models and screen sizes</p>
+                </div>
+                <div class="glass-card rounded-2xl p-6">
+                    <div class="feature-icon mx-auto mb-4">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-white mb-2">Privacy Focused</h3>
+                    <p class="text-white/70">Communicate your rights without unlocking your device</p>
+                </div>
             </div>
         </div>
-
-        <button id="generateButton" class="w-full py-3">Generate Lockscreen</button>
-
-        <div id="previewContainer" class="mt-6">
-            <canvas id="lockscreenCanvas"></canvas>
-        </div>
-
-        <button id="downloadButton" class="mt-6 w-full py-3" disabled>Download Image</button>
     </div>
 
     <script src="./main.js"></script>
