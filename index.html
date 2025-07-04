@@ -340,6 +340,27 @@
             background: linear-gradient(135deg, #4b5563, #374151);
             transform: translateY(-1px);
         }
+        
+        .close-custom-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .close-custom-btn:hover {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
     </style>
 </head>
 <body class="font-inter">
@@ -421,6 +442,12 @@
 
                         <!-- Custom Color Section (Hidden by default) -->
                         <div id="customColorSection" class="custom-color-section">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-sm font-semibold text-gray-700">Custom Colors</h4>
+                                <button type="button" class="close-custom-btn" onclick="closeCustomColors()" title="Close custom colors">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="flex items-center">
                                     <div class="input-group flex-1">

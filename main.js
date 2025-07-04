@@ -137,9 +137,7 @@ function toggleCustomColors() {
     const isShowing = customSection.classList.contains('show');
     
     if (isShowing) {
-        customSection.classList.remove('show');
-        // Reapply selected template
-        applyColorTemplate(selectedTemplateIndex);
+        closeCustomColors();
     } else {
         customSection.classList.add('show');
         // Remove selection from templates when using custom
@@ -149,6 +147,22 @@ function toggleCustomColors() {
     }
 }
 
+function closeCustomColors() {
+    const customSection = document.getElementById('customColorSection');
+    customSection.classList.remove('show');
+    
+    // Reapply the last selected template
+    applyColorTemplate(selectedTemplateIndex);
+    
+    // Re-select the template visually
+    document.querySelectorAll('.color-template').forEach((template, index) => {
+        if (index === selectedTemplateIndex) {
+            template.classList.add('selected');
+        } else {
+            template.classList.remove('selected');
+        }
+    });
+}
 // --- Color Preview Updates ---
 function updateColorPreviews() {
     const bgColor = backgroundColorInput.value;
