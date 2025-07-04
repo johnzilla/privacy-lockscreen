@@ -96,6 +96,26 @@ function populateColorTemplates() {
         templateDiv.className = `color-template ${index === 0 ? 'selected' : ''}`;
         templateDiv.onclick = () => selectColorTemplate(index);
         templateDiv.title = template.name;
+        templateDiv.tabIndex = 0;
+        templateDiv.setAttribute('role', 'radio');
+        templateDiv.setAttribute('aria-checked', index === 0 ? 'true' : 'false');
+        templateDiv.setAttribute('aria-label', `${template.name} color template`);
+        
+        // Add keyboard navigation
+        templateDiv.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                selectColorTemplate(index);
+            } else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                const nextIndex = (index + 1) % colorTemplates.length;
+                document.querySelectorAll('.color-template')[nextIndex].focus();
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                const prevIndex = (index - 1 + colorTemplates.length) % colorTemplates.length;
+                document.querySelectorAll('.color-template')[prevIndex].focus();
+            }
+        });
         
         templateDiv.innerHTML = `
             <div class="bg-section" style="background-color: ${template.bg}"></div>
@@ -111,18 +131,29 @@ function populateColorTemplates() {
 
 function selectColorTemplate(index) {
     // Remove selected class from all templates
-    document.querySelectorAll('.color-template').forEach(template => {
+    document.querySelectorAll('.color-template').forEach((template, i) => {
         template.classList.remove('selected');
+        template.setAttribute('aria-checked', 'false');
+        template.tabIndex = -1;
     });
     
     // Add selected class to clicked template
-    document.querySelectorAll('.color-template')[index].classList.add('selected');
+    const selectedTemplate = document.querySelectorAll('.color-template')[index];
+    selectedTemplate.classList.add('selected');
+    selectedTemplate.setAttribute('aria-checked', 'true');
+    selectedTemplate.tabIndex = 0;
     
     selectedTemplateIndex = index;
     applyColorTemplate(index);
     
     // Hide custom colors section when template is selected
-    document.getElementById('customColorSection').classList.remove('show');
+    const customSection = document.getElementById('customColorSection');
+    customSection.classList.remove('show');
+    customSection.setAttribute('aria-hidden', 'true');
+    
+    // Update toggle button state
+    const toggleBtn = document.querySelector('.custom-toggle-btn');
+    toggleBtn.setAttribute('aria-expanded', 'false');
 }
 
 function applyColorTemplate(index) {
@@ -134,22 +165,35 @@ function applyColorTemplate(index) {
 
 function toggleCustomColors() {
     const customSection = document.getElementById('customColorSection');
+    const toggleBtn = document.querySelector('.custom-toggle-btn');
     const isShowing = customSection.classList.contains('show');
     
     if (isShowing) {
         closeCustomColors();
     } else {
         customSection.classList.add('show');
+        customSection.setAttribute('aria-hidden', 'false');
+        toggleBtn.setAttribute('aria-expanded', 'true');
+        
         // Remove selection from templates when using custom
         document.querySelectorAll('.color-template').forEach(template => {
             template.classList.remove('selected');
+            template.setAttribute('aria-checked', 'false');
+            template.tabIndex = -1;
         });
+        
+        // Focus the first custom color input
+        document.getElementById('backgroundColor').focus();
     }
 }
 
 function closeCustomColors() {
     const customSection = document.getElementById('customColorSection');
+    const toggleBtn = document.querySelector('.custom-toggle-btn');
+    
     customSection.classList.remove('show');
+    customSection.setAttribute('aria-hidden', 'true');
+    toggleBtn.setAttribute('aria-expanded', 'false');
     
     // Reapply the last selected template
     applyColorTemplate(selectedTemplateIndex);
@@ -158,8 +202,12 @@ function closeCustomColors() {
     document.querySelectorAll('.color-template').forEach((template, index) => {
         if (index === selectedTemplateIndex) {
             template.classList.add('selected');
+            template.setAttribute('aria-checked', 'true');
+            template.tabIndex = 0;
         } else {
             template.classList.remove('selected');
+            template.setAttribute('aria-checked', 'false');
+            template.tabIndex = -1;
         }
     });
 }
