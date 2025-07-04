@@ -152,12 +152,14 @@ function generateImage() {
         });
         
         downloadButton.disabled = false;
+        document.getElementById('socialShareSection').classList.remove('hidden');
         showMessage("Lockscreen generated successfully! You can now download it.", "success");
 
     } catch (error) {
         console.error("Error generating image:", error);
         showMessage(`Error generating image: ${error.message}. Please try again.`, "error");
         downloadButton.disabled = true;
+        document.getElementById('socialShareSection').classList.add('hidden');
         // Reset canvas preview if error
         canvas.style.display = 'none';
         previewContainer.classList.remove('has-content');
@@ -259,4 +261,82 @@ function shareNative() {
         // Fallback for browsers that don't support native sharing
         copyToClipboard();
     }
+}
+
+// --- Social Media Image Sharing Functions ---
+function shareToInstagram() {
+    if (canvas.style.display === 'none' || downloadButton.disabled) {
+        showMessage("Please generate an image first.", "error");
+        return;
+    }
+    
+    // Instagram doesn't support direct image sharing from web, so we'll copy the image to clipboard
+    // and provide instructions
+    canvas.toBlob((blob) => {
+        if (navigator.clipboard && window.ClipboardItem) {
+            const item = new ClipboardItem({ 'image/png': blob });
+            navigator.clipboard.write([item]).then(() => {
+                showMessage("Image copied to clipboard! Open Instagram and paste it into your story.", "success");
+            }).catch(() => {
+                showMessage("Please download the image and manually upload it to Instagram.", "info");
+            });
+        } else {
+            showMessage("Please download the image and manually upload it to Instagram.", "info");
+        }
+    }, 'image/png');
+}
+
+function shareToTikTok() {
+    if (canvas.style.display === 'none' || downloadButton.disabled) {
+        showMessage("Please generate an image first.", "error");
+        return;
+    }
+    
+    // TikTok doesn't support direct web sharing, so we'll provide instructions
+    showMessage("Please download the image and upload it to TikTok manually. Add hashtags like #privacy #digitalrights #lockscreen", "info");
+}
+
+function shareToX() {
+    if (canvas.style.display === 'none' || downloadButton.disabled) {
+        showMessage("Please generate an image first.", "error");
+        return;
+    }
+    
+    // X (Twitter) doesn't support direct image sharing from web, but we can open with text
+    const text = "Just created my privacy lockscreen! Protect your digital rights with custom messages. #privacy #digitalrights #lockscreen";
+    const url = window.location.href;
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+    showMessage("X opened! Please download and attach your lockscreen image to the tweet.", "info");
+}
+
+function shareImageNative() {
+    if (canvas.style.display === 'none' || downloadButton.disabled) {
+        showMessage("Please generate an image first.", "error");
+        return;
+    }
+    
+    canvas.toBlob((blob) => {
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], 'lockscreen.png', { type: 'image/png' })] })) {
+            const file = new File([blob], 'privacy_lockscreen.png', { type: 'image/png' });
+            navigator.share({
+                title: 'My Privacy Lockscreen',
+                text: 'Check out my custom privacy lockscreen!',
+                files: [file]
+            }).catch(() => {
+                showMessage("Sharing failed. Please download the image manually.", "error");
+            });
+        } else {
+            // Fallback: copy image to clipboard
+            if (navigator.clipboard && window.ClipboardItem) {
+                const item = new ClipboardItem({ 'image/png': blob });
+                navigator.clipboard.write([item]).then(() => {
+                    showMessage("Image copied to clipboard! You can now paste it in your favorite app.", "success");
+                }).catch(() => {
+                    showMessage("Please download the image to share it.", "info");
+                });
+            } else {
+                showMessage("Please download the image to share it.", "info");
+            }
+        }
+    }, 'image/png');
 }
